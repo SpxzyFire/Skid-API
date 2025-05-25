@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skid Softworks</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Orbitron", "Noto Color Emoji", -apple-system,
+          BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #1a0933 0%, #2e1a47 100%);
+        color: #e0e0e0;
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0f071a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+      }
+
+      .loading-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .loading-logo {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        background: linear-gradient(90deg, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-transform: uppercase;
+        animation: pulse 1.5s ease-in-out infinite;
+        position: relative;
+      }
+
+      .loading-logo::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          transparent 49%,
+          rgba(168, 85, 247, 0.3) 50%,
+          transparent 51%
+        );
+        background-size: 10px 10px;
+        animation: scanline 2s linear infinite;
+      }
+
+      .loading-circle {
+        width: 40px;
+        height: 40px;
+        border: 3px solid transparent;
+        border-top-color: #a855f7;
+        border-bottom-color: #ec4899;
+        margin-top: 10px;
+        animation: spin 1s linear infinite;
+        position: relative;
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+      }
+
+      .loading-circle::after {
+        content: "";
+        position: absolute;
+        top: -3px;
+        left: -3px;
+        width: 46px;
+        height: 46px;
+        background: linear-gradient(
+          45deg,
+          transparent 49%,
+          rgba(168, 85, 247, 0.2) 50%,
+          transparent 51%
+        );
+        background-size: 8px 8px;
+        animation: scanline 1.5s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+      }
+
+      .loading-text {
+        color: #d1d5db;
+        font-size: 1rem;
+        margin-top: 10px;
+        letter-spacing: 1px;
+      }
+
+      @keyframes scanline {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 10px 10px;
+        }
+      }
+
+      .background-highlight {
+        position: fixed;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(
+          circle at center,
+          rgba(168, 85, 247, 0.5) 0%,
+          transparent 60%
+        );
+        opacity: 0.8;
+        transition: transform 0.8s ease-out;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 10;
+      }
+
+      .header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        padding: 15px;
+        background: #0f071a;
+        border: 2px solid #a855f7;
+        box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      .header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          transparent 49%,
+          rgba(168, 85, 247, 0.2) 50%,
+          transparent 51%
+        );
+        background-size: 10px 10px;
+        animation: scanline 4s linear infinite;
+        pointer-events: none;
+      }
+
+      .header-title {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        background: linear-gradient(90deg, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-transform: uppercase;
+      }
+
+      .header-percentage {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #ec4899;
+      }
+
+      .scroll-container {
+        display: grid;
+        gap: 15px;
+      }
+
+      .deck {
+        background: #0f071a;
+        border: 2px solid #a855f7;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .deck:hover {
+        box-shadow: 0 0 35px rgba(168, 85, 247, 0.9);
+      }
+
+      .highlight {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(
+          circle at center,
+          rgba(168, 85, 247, 0.7) 0%,
+          transparent 60%
+        );
+        opacity: 0;
+        transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+        pointer-events: none;
+      }
+
+      .deck:hover .highlight {
+        opacity: 1;
+      }
+
+      .deck-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f3f4f6;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .deck:hover .deck-title {
+        color: #ec4899;
+      }
+
+      .progress {
+        height: 8px;
+        background: #1a0933;
+        border: 1px solid #a855f7;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #a855f7, #ec4899);
+        transition: width 0.6s ease-in-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .progress-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          transparent 49%,
+          rgba(255, 255, 255, 0.2) 50%,
+          transparent 51%
+        );
+        background-size: 10px 10px;
+        animation: scanline 2s linear infinite;
+      }
+
+      .progress-bar:hover::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0f071a;
+        border: 1px solid #a855f7;
+        color: #ec4899;
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        z-index: 10;
+      }
+
+      .deck-details {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+        padding: 0 10px;
+      }
+
+      .deck.open .deck-details {
+        max-height: 300px;
+        padding: 10px;
+      }
+
+      .detail-line {
+        font-size: 0.85rem;
+        color: #d1d5db;
+        margin: 6px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        line-height: 1.3;
+      }
+
+      .detail-line::before {
+        content: ">";
+        color: #a855f7;
+        font-size: 0.9rem;
+        font-weight: bold;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #ec4899;
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        pointer-events: none;
+        animation: particleFloat 3s ease-in-out infinite;
+      }
+
+      @keyframes particleFloat {
+        0% {
+          transform: translateY(0);
+          opacity: 0.7;
+        }
+        50% {
+          opacity: 0.3;
+        }
+        100% {
+          transform: translateY(-150px);
+          opacity: 0;
+        }
+      }
+
+      .shooting-star {
+        position: absolute;
+        width: 3px;
+        height: 20px;
+        background: linear-gradient(to bottom, #ffffff, #ec4899, transparent);
+        transform: rotate(45deg);
+        box-shadow: 0 0 8px rgba(236, 72, 153, 0.8);
+        animation: shootStar linear infinite;
+        z-index: 2;
+      }
+
+      @keyframes shootStar {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) rotate(45deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(120vw, 120vh) rotate(45deg);
+        }
+      }
+
+      .discord-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #0f071a;
+        border: 2px solid #a855f7;
+        color: #ec4899;
+        padding: 10px 20px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        transition: color 0.2s ease, box-shadow 0.2s ease;
+        text-transform: uppercase;
+        z-index: 20;
+      }
+
+      .discord-button:hover {
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(168, 85, 247, 0.8);
+      }
+
+      @media (max-width: 768px) {
+        .header-title {
+          font-size: 1.5rem;
+        }
+        .header-percentage {
+          font-size: 1rem;
+        }
+        .deck-title {
+          font-size: 1rem;
+        }
+        .container {
+          margin: 20px auto;
+          padding: 0 10px;
+        }
+        .discord-button {
+          bottom: 15px;
+          right: 15px;
+          padding: 8px 16px;
+          font-size: 0.8rem;
+        }
+        .background-highlight {
+          width: 150px;
+          height: 150px;
+        }
+        .shooting-star {
+          width: 2px;
+          height: 15px;
+        }
+        .loading-logo {
+          font-size: 2rem;
+        }
+        .loading-text {
+          font-size: 0.9rem;
+        }
+        .loading-circle {
+          width: 30px;
+          height: 30px;
+        }
+        .loading-circle::after {
+          width: 36px;
+          height: 36px;
+          top: -3px;
+          left: -3px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-screen" id="loading-screen">
+      <div class="loading-logo">Skid Softworks</div>
+      <div class="loading-circle"></div>
+      <div class="loading-text">Initializing...</div>
+    </div>
+
+    <div class="background-highlight" id="background-highlight"></div>
+
+    <div class="container">
+      <div class="header">
+        <div class="header-title">Skid Softworks</div>
+        <div class="header-percentage" id="average-progress">Average : 0%</div>
+      </div>
+      <div class="scroll-container" id="scroll-container"></div>
+    </div>
+
+    <a
+      href="https://discord.gg/ZUmJdQf2Xc"
+      target="_blank"
+      class="discord-button"
+      >Join Discord</a
+    >
+
+    <div id="shooting-stars"></div>
+
+    <script>
+      // Hide loading screen after 2 seconds
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          document.getElementById("loading-screen").classList.add("hidden");
+        }, 2000);
+      });
+
+      const progressData = [
+        {
+          name: "SkidAPI Nezur",
+          progress: 92,
+          note: "Unc",
+          details: [
+            "100% sUnc 🟢",
+            "Level 3 🟡",
+            "Often Crashes🔴",
+            "Bad TPHandler 🔴",
+          ],
+        },
+        {
+          name: "SkidAPI SubZero",
+          progress: 86,
+          note: "Unc",
+          details: [
+            "Alot Of Features 🟢",
+            "IsInjected check ✅",
+            "Unknown% sUnc 🔴",
+            "Level 3🟡",
+            "Stable 🟢",
+          ],
+        },
+        {
+          name: "SkidAPI Xeno",
+          progress: 83,
+          note: "Unc",
+          details: ["65% sUnc 🟡", "Level 3 🟡", "Rare Crashes 🟡"],
+        },
+        {
+          name: "SkidAPI JJSploit",
+          progress: 81,
+          note: "Unc",
+          details: [
+            "Xeno Paste 🔴",
+            "Unknown% sUnc 🔴",
+            "Level 3 🟡",
+            "Rarely Crashes 🟡",
+          ],
+        },
+        {
+          name: "Skid Executor",
+          progress: 100,
+          note: "Sigma",
+          details: [
+            "Monaco Editor ✅",
+            "Scripthub Editor✅",
+            "Fresh and Custom ✅",
+            "Safe to Use ✅",
+            "No Key System ✅",
+          ],
+        },
+      ];
+
+      // Calculate average progress
+      const averageProgress = (
+        progressData.reduce((sum, item) => sum + item.progress, 0) /
+        progressData.length
+      ).toFixed(1);
+      document.getElementById(
+        "average-progress"
+      ).textContent = `Average : ${averageProgress}%`;
+
+      // Generate bubble positions
+      const bubblePositions = Array.from({ length: 10 }, () =>
+        Math.floor(Math.random() * 100)
+      );
+
+      // Generate shooting stars
+      const shootingStars = Array.from({ length: 60 }, () => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 110 - 10}%`,
+        duration: `${Math.random() * 1.5 + 2}s`, // 2 to 3.5s
+        delay: `${Math.random() * 2}s`,
+      }));
+
+      // Render shooting stars
+      const starsContainer = document.getElementById("shooting-stars");
+      shootingStars.forEach((star) => {
+        const starEl = document.createElement("div");
+        starEl.className = "shooting-star";
+        starEl.style.left = star.left;
+        starEl.style.top = star.top;
+        starEl.style.animationDuration = star.duration;
+        starEl.style.animationDelay = star.delay;
+        starsContainer.appendChild(starEl);
+      });
+
+      // Background highlight mouse tracking
+      const backgroundHighlight = document.getElementById(
+        "background-highlight"
+      );
+      document.addEventListener("mousemove", (e) => {
+        const x = e.clientX;
+        const y = e.clientY;
+        backgroundHighlight.style.transform = `translate(${x - 100}px, ${
+          y - 100
+        }px)`; // Center 200x200px highlight
+      });
+
+      // Render progress data
+      const scrollContainer = document.getElementById("scroll-container");
+      progressData.forEach((game, index) => {
+        const deck = document.createElement("div");
+        deck.className = "deck";
+        deck.onclick = function () {
+          this.classList.toggle("open");
+        };
+
+        // Create highlight element
+        const highlight = document.createElement("div");
+        highlight.className = "highlight";
+        deck.appendChild(highlight);
+
+        // Deck mouse movement handler
+        deck.onmousemove = function (e) {
+          const rect = this.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          highlight.style.transform = `translate(${x - 60}px, ${y - 60}px)`; // Center 120x120px highlight
+        };
+
+        deck.onmouseleave = function () {
+          highlight.style.opacity = "0";
+          highlight.style.transform = `translate(-200px, -200px)`; // Move off-screen
+        };
+
+        deck.onmouseenter = function () {
+          highlight.style.opacity = "1";
+        };
+
+        const title = document.createElement("div");
+        title.className = "deck-title";
+        title.textContent = `${game.name}: ${game.progress}% ${game.note}`;
+        deck.appendChild(title);
+
+        const progress = document.createElement("div");
+        progress.className = "progress";
+        const progressBar = document.createElement("div");
+        progressBar.className = "progress-bar";
+        progressBar.style.width = `${game.progress}%`;
+        progressBar.setAttribute("data-tooltip", `${game.progress}%`);
+
+        // Add particles
+        for (let i = 0; i < 10; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.left = `${bubblePositions[i]}%`;
+          particle.style.animationDelay = `${i * 0.3}s`;
+          progressBar.appendChild(particle);
+        }
+
+        progress.appendChild(progressBar);
+        deck.appendChild(progress);
+
+        const details = document.createElement("div");
+        details.className = "deck-details";
+        game.details.forEach((line) => {
+          const detailLine = document.createElement("div");
+          detailLine.className = "detail-line";
+          detailLine.textContent = line;
+          details.appendChild(detailLine);
+        });
+
+        deck.appendChild(details);
+        scrollContainer.appendChild(deck);
+      });
+    </script>
+  </body>
+</html>
