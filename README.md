@@ -12,4 +12,13 @@
 
 🎥 We have Showcases and Tutorials for our Tools and API's 🎥
 
+# Currently Avaible API's!
+SkidAPINezur ✅
+
+SkidAPISubZero ✅
+
+SkidAPIJJSploit ✅
+
+SkidAPIXeno ✅
+
 https://skid-softworks.vercel.app/
