@@ -21,4 +21,8 @@ SkidAPIJJSploit ✅
 
 SkidAPIXeno ✅
 
+# Do we have any competitors?
+🤔 We do have competitors!
+
+We have arround 2-3 Competitors
 https://skid-softworks.vercel.app/
