@@ -25,4 +25,12 @@ SkidAPIXeno ✅
 🤔 We do have competitors!
 
 We have arround 2-3 Competitors
+
+# Why are we doing this?
+😢 Most of the API's you will find are ratted, mainly those who are obfuscated! 😢
+
+😊 We want to make sure you guys can learn and become a better programmer 😊
+
+🔧 We want to show others how fun Game Hacking can be! 🔧
+
 https://skid-softworks.vercel.app/
