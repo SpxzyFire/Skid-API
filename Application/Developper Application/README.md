@@ -1,7 +1,7 @@
 # Developper Application
 
 
-To be hired, you will NEED to prove your strengh : Share a project of the following things : 
+1) To be hired, you will NEED to prove your strengh : Share a project of the following things : 
 ```diff
 + WPF/Winforms Executor UI (Must be open sourced in case of rats)
 
@@ -20,7 +20,7 @@ To be hired, you will NEED to prove your strengh : Share a project of the follow
 Example of answer : "i will do a Module/ExecutorUI/API/Monaco/etc...
 ```
 
-What level of Skid are you?
+2) What level of Skid are you?
 ```diff
 + Lvl 1 (Cracked SubZero and basic API's, skidded executors, etc)
 + Lvl 2 (Cracked multiple API's, Skidded alot of stuff, etc)
@@ -31,7 +31,7 @@ What level of Skid are you?
 Example of answer : "I am lvl 1/2/3/4/5"
 ```
 
-Are you active?
+3) Are you active?
 ```diff
 Example answer : yes i am really active and always answer to pings (when online)
 ```
@@ -41,19 +41,19 @@ Give us a text on why do you think we should hire you?
 Example answer : "i am a professional developper, i already have experience from coding and cracking softwares..."
 ```
 
-How old are you?
+4) How old are you?
 ```diff
 Examples :
 + I am {13+ years old)
 - I am under 13 years old
 ```
 
-Are you affiliated with other things?
+5) Are you affiliated with other things?
 ```diff
 Example answer : Yes, i am a staff for (like : exemple softworks)
 ```
 
-How good are you in developping softwares?
+6) How good are you in developping softwares?
 ```diff
 + Lvl 1 : My ui's are dogshit (basic winform ui's)
 + Lvl 2 : My ui's are decently good (good/average winforms)
@@ -63,14 +63,14 @@ How good are you in developping softwares?
 Example answer : "I am lvl 1/2/3/4/5"
 ```
 
-Do you know how to code? (Without Chatgpt's assistance)
+6) Do you know how to code? (Without Chatgpt's assistance)
 ```diff
 + Yes (cool i guess)
 + No (You can still be hired)
 
 Example answer : yes/no
 ```
-(if no, say "no") What language(s) do you know
+7) (if no, say "no") What language(s) do you know
 ```diff
 Example answer : i know : lua, csharp, cpp, html, xaml, python, etc
 
