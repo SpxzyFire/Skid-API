@@ -166,16 +166,18 @@ local function aimAtNearestZombie()
     end
 end
 
--- Kavo UI Setup
 local Window = Library.CreateLib("Skid Softworks - Zombie Story", "Serpent")
 local AimbotTab = Window:NewTab("Aimbot")
 local ESPTab = Window:NewTab("ESP")
-local OtherTab = Window:NewTab("Other")
-local AimbotSection = AimbotTab:NewSection("Aimbot Settings")
-local ESPSection = ESPTab:NewSection("ESP Settings")
-local OtherSection = OtherTab:NewSection("Other Settings")
+local ModTab = Window:NewTab("Gun Mods")
+local ViewTab = Window:NewTab("View Model")
 
--- FOV Circle
+local AimbotSection = AimbotTab:NewSection("Aimbot Section")
+local ModSection = ModTab:NewSection("Gun Mods Section")
+local ViewSection = ViewTab:NewSection("View Models Section")
+
+local ESPSection = ESPTab:NewSection("Esp Section")
+
 local fovCircle
 local function createFOVCircle()
     if fovCircle then
@@ -254,28 +256,205 @@ ESPSection:NewDropdown("Cham Color", "Select ESP highlight color", {"Green", "Re
     debugPrint("Cham Color set to " .. option)
 end)
 
--- Other Tab Elements
-OtherSection:NewSlider("Camera FOV", "Adjust camera field of view", 120, 30, function(value)
-    settings.CameraFOV = value
-    Camera.FieldOfView = value
-    debugPrint("Camera FOV set to " .. value)
+
+ModSection:NewButton("No Recoil", "ButtonInfo", function()
+    --// No Recoil Modifier by ChatGPT
+-- Works with ZS_Framework based on provided paths
+
+local function findWeaponTables()
+	local found = {}
+	for _, obj in ipairs(getgc(true)) do
+		if type(obj) == "table" and rawget(obj, "Config") and rawget(obj, "WeaponId") then
+			table.insert(found, obj)
+		end
+	end
+	return found
+end
+
+-- Hook recoil function to disable recoil functionally
+local function hookNoRecoil(weaponTable)
+	if weaponTable.Recoil and type(weaponTable.Recoil) == "function" then
+		hookfunction(weaponTable.Recoil, function(...) 
+			-- No recoil
+		end)
+	end
+end
+
+-- Only remove recoil
+local function removeRecoil(weaponTable)
+	local config = weaponTable.Config
+	if not config then return end
+
+	-- Set recoil-related values to 0
+	config.Recoil = 0
+	config.HorizontalRecoil = 0
+	config.VerticalRecoil = 0
+	
+	-- Optional: disable camera shake
+	if config.CameraShake then
+		config.CameraShake = nil
+	end
+
+	-- Hook function if there's a recoil method
+	hookNoRecoil(weaponTable)
+	
+	print("[No Recoil Modifier] Modified:", weaponTable.Name or weaponTable.WeaponId)
+end
+
+-- Continuously scan and remove recoil
+task.spawn(function()
+	while true do
+		local weapons = findWeaponTables()
+		for _, wep in ipairs(weapons) do
+			pcall(removeRecoil, wep)
+		end
+		task.wait(1)
+	end
 end)
 
-OtherSection:NewSlider("Walkspeed", "Adjust player walkspeed", 100, 16, function(value)
-    settings.Walkspeed = value
-    if localPlayer.Character and localPlayer.Character:FindFirstChild("Humanoid") then
-        localPlayer.Character.Humanoid.WalkSpeed = value
-    end
-    debugPrint("Walkspeed set to " .. value)
 end)
 
-OtherSection:NewSlider("Jumppower", "Adjust player jumppower", 200, 50, function(value)
-    settings.Jumppower = value
-    if localPlayer.Character and localPlayer.Character:FindFirstChild("Humanoid") then
-        localPlayer.Character.Humanoid.JumpPower = value
-    end
-    debugPrint("Jumppower set to " .. value)
+ModSection:NewButton("No Spread", "ButtonInfo", function()
+    --// No Spread Modifier by ChatGPT
+-- Works with ZS_Framework based on provided paths
+
+local function findWeaponTables()
+	local found = {}
+	for _, obj in ipairs(getgc(true)) do
+		if type(obj) == "table" and rawget(obj, "Config") and rawget(obj, "WeaponId") then
+			table.insert(found, obj)
+		end
+	end
+	return found
+end
+
+-- Only remove spread
+local function removeSpread(weaponTable)
+	local config = weaponTable.Config
+	if not config then return end
+
+	-- Set spread-related value to 0
+	config.Spread = 0
+
+	print("[No Spread Modifier] Modified:", weaponTable.Name or weaponTable.WeaponId)
+end
+
+-- Continuously scan and remove spread
+task.spawn(function()
+	while true do
+		local weapons = findWeaponTables()
+		for _, wep in ipairs(weapons) do
+			pcall(removeSpread, wep)
+		end
+		task.wait(1)
+	end
 end)
+end)
+
+
+local selectedMaterial = "ForceField"
+local selectedColor = Color3.fromRGB(255, 255, 255)
+local rainbowEnabled = false
+local rainbowSpeed = 1
+local applying = false
+local applyTask
+
+local ignoreFolder = workspace:FindFirstChild("Ignore")
+if not ignoreFolder then return end
+
+ViewSection:NewDropdown("Material", "Choose Material", {"ForceField","Neon","Plastic","SmoothPlastic","Metal","Wood","Glass","Ice","DiamondPlate","Fabric","Grass","Slate","Concrete","Granite","Brick","Pebble","CorrodedMetal"}, function(mat)
+	selectedMaterial = mat
+end)
+
+ViewSection:NewColorPicker("Color", "Pick Color", selectedColor, function(color)
+	selectedColor = color
+end)
+
+ViewSection:NewToggle("Rainbow", "Toggle Rainbow Effect", function(state)
+	rainbowEnabled = state
+end)
+
+ViewSection:NewSlider("Rainbow Speed", "Speed of Rainbow Color Change", 10, 0.1, function(val)
+	rainbowSpeed = val
+end)
+
+ViewSection:NewToggle("Apply", "Toggle continuous apply", function(state)
+	applying = state
+	if applying then
+		applyTask = task.spawn(function()
+			while applying do
+				local matEnum = Enum.Material[selectedMaterial]
+				for _, model in pairs(ignoreFolder:GetChildren()) do
+					if model:IsA("Model") then
+						-- Apply to all BaseParts
+						for _, obj in pairs(model:GetDescendants()) do
+							if obj:IsA("BasePart") then
+								obj.Material = matEnum
+								if rainbowEnabled then
+									local hue = (tick() * rainbowSpeed) % 1
+									obj.Color = Color3.fromHSV(hue, 1, 1)
+								else
+									obj.Color = selectedColor
+								end
+							end
+						end
+
+						-- Check if model has arms
+						local hasLeftArm = model:FindFirstChild("Left Arm") or model:FindFirstChild("LeftArm")
+						local hasRightArm = model:FindFirstChild("Right Arm") or model:FindFirstChild("RightArm")
+						if hasLeftArm or hasRightArm then
+							for _, armName in pairs({"Left Arm", "Right Arm", "LeftArm", "RightArm"}) do
+								local arm = model:FindFirstChild(armName)
+								if arm then
+									if arm:IsA("BasePart") then
+										arm.Material = matEnum
+										if rainbowEnabled then
+											local hue = (tick() * rainbowSpeed) % 1
+											arm.Color = Color3.fromHSV(hue, 1, 1)
+										else
+											arm.Color = selectedColor
+										end
+									else
+										for _, part in pairs(arm:GetDescendants()) do
+											if part:IsA("BasePart") then
+												part.Material = matEnum
+												if rainbowEnabled then
+													local hue = (tick() * rainbowSpeed) % 1
+													part.Color = Color3.fromHSV(hue, 1, 1)
+												else
+													part.Color = selectedColor
+												end
+											end
+										end
+									end
+								end
+							end
+						else
+							for _, partName in pairs({"Head", "HumanoidRootPart"}) do
+								local part = model:FindFirstChild(partName)
+								if part and part:IsA("BasePart") then
+									part.Material = matEnum
+									if rainbowEnabled then
+										local hue = (tick() * rainbowSpeed) % 1
+										part.Color = Color3.fromHSV(hue, 1, 1)
+									else
+										part.Color = selectedColor
+									end
+								end
+							end
+						end
+					end
+				end
+				task.wait(0.1)
+			end
+		end)
+	else
+		if applyTask then
+			applyTask = nil
+		end
+	end
+end)
+
 
 -- Initialize
 UserInputService.InputBegan:Connect(function(input)
