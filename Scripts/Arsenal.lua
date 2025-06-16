@@ -8,6 +8,16 @@ local SkidsWorld = library:CreateWindow({
     }
 })
 
+local SettingsTab = SkidsWorld:CreateTab({ Name = "UI" })
+
+local MenuSection = SettingsTab:CreateSection({ Name = "Menu Controls", Side = "Left" })
+local ConfigSection = SettingsTab:CreateSection({ Name = "Configuration", Side = "Right" })
+
+MenuSection:AddButton({
+    Name = "Unload GUI",
+    Callback = function() library:Unload() end
+})
+
 local function SetSoundValue(obj, assetId)
     if obj and assetId then
         local fullId = "rbxassetid://" .. tostring(assetId)
@@ -294,7 +304,7 @@ BoxSection:AddToggle({ Name = "Team Check", Flag = "ESP_BoxTeamCheck", Value = t
 BoxSection:AddColorpicker({ Name = "Color Outline", Flag = "ESP_BoxOutlineColor", Value = Color3.fromRGB(0, 0, 0), Callback = function() end })
 BoxSection:AddColorpicker({ Name = "Color Inline", Flag = "ESP_BoxColor", Value = Color3.fromRGB(255, 0, 0), Callback = function() end })
 
-local HealthSection = ESPTab:CreateSection({ Name = "Healthbar" })
+local HealthSection = ESPTab:CreateSection({ Name = "Healthbar", Side = "Right"})
 HealthSection:AddToggle({ Name = "Enable Healthbar", Flag = "ESP_HealthBarEnabled", Value = true })
 HealthSection:AddColorpicker({ Name = "Healthbar Color", Flag = "ESP_HealthBarColor", Value = Color3.fromRGB(0, 255, 0), Callback = function() end })
 
@@ -303,7 +313,7 @@ TracerSection:AddToggle({ Name = "Enable Tracers", Flag = "ESP_TracerEnabled", C
 TracerSection:AddToggle({ Name = "Team Check", Flag = "ESP_TracerTeamCheck", Value = true })
 TracerSection:AddColorpicker({ Name = "Color", Flag = "ESP_TracerColor", Value = Color3.fromRGB(255, 0, 0), Callback = function() end })
 
-local InfoSection = ESPTab:CreateSection({ Name = "Distance ESP" })
+local InfoSection = ESPTab:CreateSection({ Name = "Text ESP", Side = "Right"})
 InfoSection:AddToggle({ Name = "Show Distance", Flag = "ESP_ShowDistance", Value = true })
 InfoSection:AddToggle({ Name = "Show Names", Flag = "ESP_ShowNames", Value = true })
 InfoSection:AddColorpicker({ Name = "Color", Flag = "ESP_InfoColor", Value = Color3.fromRGB(255, 255, 255), Callback = function() end })
@@ -392,21 +402,26 @@ local function UpdateESP()
             local char = player.Character
             local rootPart = char.HumanoidRootPart
             local humanoid = char:FindFirstChildOfClass("Humanoid")
+            local head = char:FindFirstChild("Head")
             local rootPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
             
             if onScreen then
-                local boxSize = Vector2.new(2000 / rootPos.Z, 3000 / rootPos.Z)
-                local boxPosition = Vector2.new(rootPos.X - boxSize.X / 2, rootPos.Y - boxSize.Y / 2)
+                -- Calculate box size based on head and root positions
+                local headPos = head and Camera:WorldToViewportPoint(head.Position) or rootPos
+                local height = math.abs(headPos.Y - rootPos.Y) * 1.2 -- Add 20% padding for height
+                local width = height * 0.6 -- Approximate width as 60% of height for a balanced box
+                
+                local boxPosition = Vector2.new(rootPos.X - width / 2, headPos.Y - height)
                 
                 if library.flags.ESP_BoxEnabled then
                     local isTeammate = library.flags.ESP_BoxTeamCheck and player.Team == LocalPlayer.Team
                     if not isTeammate then
-                        ESP.Box.Size = boxSize
+                        ESP.Box.Size = Vector2.new(width, height)
                         ESP.Box.Position = boxPosition
                         ESP.Box.Color = library.flags.ESP_BoxColor
                         ESP.Box.Visible = true
-                        ESP.BoxOutline.Size = boxSize + Vector2.new(2, 2)
-                        ESP.BoxOutline.Position = boxPosition - Vector2.new(1, 1)
+                        ESP.BoxOutline.Size = Vector2.new(width + 2, height + 2)
+                        ESP.BoxOutline.Position = Vector2.new(boxPosition.X - 1, boxPosition.Y - 1)
                         ESP.BoxOutline.Color = library.flags.ESP_BoxOutlineColor
                         ESP.BoxOutline.Visible = true
                     else
@@ -422,12 +437,12 @@ local function UpdateESP()
                     local isTeammate = library.flags.ESP_BoxTeamCheck and player.Team == LocalPlayer.Team
                     if not isTeammate then
                         local healthPercent = humanoid.Health / humanoid.MaxHealth
-                        local barHeight = boxSize.Y * healthPercent
+                        local barHeight = height * healthPercent
                         ESP.HealthBar.Size = Vector2.new(3, barHeight)
-                        ESP.HealthBar.Position = Vector2.new(boxPosition.X - 8, boxPosition.Y + (boxSize.Y - barHeight))
+                        ESP.HealthBar.Position = Vector2.new(boxPosition.X - 8, boxPosition.Y + (height - barHeight))
                         ESP.HealthBar.Color = library.flags.ESP_HealthBarColor
                         ESP.HealthBar.Visible = true
-                        ESP.HealthBarOutline.Size = Vector2.new(5, boxSize.Y + 2)
+                        ESP.HealthBarOutline.Size = Vector2.new(5, height + 2)
                         ESP.HealthBarOutline.Position = Vector2.new(boxPosition.X - 9, boxPosition.Y - 1)
                         ESP.HealthBarOutline.Visible = true
                     else
@@ -459,7 +474,7 @@ local function UpdateESP()
                         if library.flags.ESP_ShowDistance then
                             local distance = (rootPart.Position - localChar.HumanoidRootPart.Position).Magnitude
                             ESP.DistanceLabel.Text = string.format("%.1f studs", distance)
-                            ESP.DistanceLabel.Position = Vector2.new(rootPos.X, boxPosition.Y + boxSize.Y + 5)
+                            ESP.DistanceLabel.Position = Vector2.new(rootPos.X, boxPosition.Y + height + 5)
                             ESP.DistanceLabel.Color = library.flags.ESP_InfoColor
                             ESP.DistanceLabel.Visible = true
                         else
@@ -514,74 +529,4 @@ library.OnUnload:Connect(function()
         end
     end
     ESPObjects = {}
-end)
-
-local SettingsTab = SkidsWorld:CreateTab({ Name = "UI Settings" })
-local MenuSection = SettingsTab:CreateSection({ Name = "Menu", Side = "Left" })
-
-MenuSection:AddButton({
-    Name = "Unload GUI",
-    Callback = function() library:Unload() end
-})
-
-MenuSection:AddKeybind({
-    Name = "Toggle Menu",
-    Flag = "MenuSection_MenuKeybind",
-    Default = Enum.KeyCode.End,
-    Mode = "Toggle",
-    Callback = function() library:Toggle() end
-})
-
-MenuSection:AddDropdown({
-    Name = "Theme",
-    Flag = "MenuSection_Theme",
-    List = {"Default", "Dark", "Light"},
-    Value = "Default",
-    Callback = function(value)
-        if library.SetTheme then
-            library:SetTheme(value:lower())
-            print("Theme set to: " .. value)
-        else
-            warn("Theme setting not supported by this library version")
-        end
-    end
-})
-
-MenuSection:AddButton({
-    Name = "Save Config",
-    Callback = function()
-        if library.SaveConfig then
-            library:SaveConfig()
-            print("Config saved successfully")
-        else
-            warn("Config saving not supported by this library version")
-        end
-    end
-})
-
-game:GetService("RunService").Heartbeat:Connect(function()
-    if not Settings then return end
-    if hitSoundEnabled then
-        local obj = Settings:FindFirstChild("HitSound")
-        if obj and obj:IsA("StringValue") and obj.Value ~= "rbxassetid://" .. currentHitSound then
-            SetSoundValue(obj, currentHitSound)
-        end
-    end
-    if killSoundEnabled then
-        local obj = Settings:FindFirstChild("KillSound")
-        if obj and obj:IsA("StringValue") and obj.Value ~= "rbxassetid://" .. currentKillSound then
-            SetSoundValue(obj, currentKillSound)
-        end
-    end
-    if ambientEnabled then
-        SetAmbientColor(currentAmbientColor)
-    end
-    if fovEnabled then
-        local fovObj = Settings:FindFirstChild("FOV")
-        if fovObj and fovObj.Value ~= currentFOV then
-            fovObj.Value = currentFOV
-        elseif game.Workspace.CurrentCamera and game.Workspace.CurrentCamera.FieldOfView ~= currentFOV then
-            game.Workspace.CurrentCamera.FieldOfView = currentFOV
-        end
-    end
 end)
