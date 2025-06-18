@@ -13,6 +13,7 @@ local prison = serv:Channel("Prison Life")
 local rails = serv:Channel("Dead Rails")
 local tsgb = serv:Channel("TSBG")
 local mm2 = serv:Channel("MM2")
+local babft = serv:Channel("BABFT")
 
 Featured:Button("Skid Softworks - Zombie Story", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/SpxzyFire/Skid-API/refs/heads/main/Scripts/Zombie%20Story.lua"))()
@@ -89,4 +90,35 @@ end)
 
 mm2:Button("MM2", function()
     loadstring(game.HttpGet(game,'https://raw.githubusercontent.com/Au0yX/Community/main/XhubMM2'))()
+end)
+
+mm2:Button("Vynixius", function()
+    loadstring(game:GetObjects("rbxassetid://4001118261")[1].Source)()
+end)
+
+babft:Button("Infinite Slots (no gui)", function()
+    for i = 1, slotsyouwant do
+        task.spawn(function()
+            local args = {
+                [1] = 1,
+                [2] = tostring(i) .. "\0", 
+                [3] = 0,
+                [4] = ""
+            }
+
+            workspace:WaitForChild("UpdateSlotOrderRE"):FireServer(unpack(args))
+        end)
+    end
+end)
+
+babft:Button("BenixHub", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/hzpu/Benix/refs/heads/main/babft.lua", true))()
+end)
+
+babft:Button("Simple/Shit Autofarm", function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/Z7LzXxsy",true))()
+end)
+
+babft:Button("Advanced GUI", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/TheRealAsu/BABFT/refs/heads/main/Jan25_Source.lua'))()
 end)
