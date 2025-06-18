@@ -26,10 +26,6 @@ arsenal:Button("Tbao Hub", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/thaibao/refs/heads/main/TbaoHubArsenal"))()
 end)
 
-muscle:Button("Speed hub X", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Insertl/QuotasHub/main/BETAv1.3"))()
-end)
-
 ninja:Button("Simple Autofarm", function()
     local Owner = "Zepsyy"
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Zepsyy2/asd/main/Ninja%20Legends.lua"))()
