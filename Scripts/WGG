@@ -1,0 +1,178 @@
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Settings table to store toggle states (removed AimbotOn)
+local Settings = {
+    InstantReload = false,
+    InfiniteAmmo = false,
+    NoRecoil = false,
+    NoSpread = false,
+    FastShoot = false,
+}
+
+local guiVisible = true
+local contentVisible = true
+local buttons = {}
+
+-- GUI Setup
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "GunCheatGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Loading Screen Frame
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Size = UDim2.new(0, 250, 0, 100)
+LoadingFrame.Position = UDim2.new(0.5, -125, 0.5, -50)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+LoadingFrame.BorderSizePixel = 0
+LoadingFrame.Parent = ScreenGui
+
+local LoadingText = Instance.new("TextLabel")
+LoadingText.Size = UDim2.new(1, 0, 1, 0)
+LoadingText.BackgroundTransparency = 1
+LoadingText.Text = "Loading..."
+LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadingText.TextSize = 24
+LoadingText.Font = Enum.Font.SourceSansBold
+LoadingText.Parent = LoadingFrame
+
+-- Main Frame (hidden initially)
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 250, 0, 300)
+Frame.Position = UDim2.new(0.5, -125, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Frame.BorderSizePixel = 0
+Frame.Active = true
+Frame.Draggable = true
+Frame.Visible = false -- Hide at start
+Frame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = Frame
+
+-- Title Bar
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -40, 0, 40)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Skid Softworks | WGG"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.Font = Enum.Font.SourceSansBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Frame
+
+-- Minimize Button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+MinimizeButton.Position = UDim2.new(1, -35, 0, 5)
+MinimizeButton.Text = "-"
+MinimizeButton.TextSize = 20
+MinimizeButton.Font = Enum.Font.SourceSansBold
+MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+MinimizeButton.Parent = Frame
+
+local MinimizeCorner = Instance.new("UICorner")
+MinimizeCorner.CornerRadius = UDim.new(0, 5)
+MinimizeCorner.Parent = MinimizeButton
+
+-- Function to create toggle button
+local function createToggleButton(name, yOffset, settingKey)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0.9, 0, 0, 40)
+    Button.Position = UDim2.new(0.05, 0, 0, yOffset)
+    Button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    Button.Text = name .. ": OFF"
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 16
+    Button.Font = Enum.Font.SourceSans
+    Button.Parent = Frame
+
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 5)
+    ButtonCorner.Parent = Button
+
+    Button.MouseButton1Click:Connect(function()
+        Settings[settingKey] = not Settings[settingKey]
+        Button.Text = name .. ": " .. (Settings[settingKey] and "ON" or "OFF")
+        Button.BackgroundColor3 = Settings[settingKey] and Color3.fromRGB(0, 120, 0) or Color3.fromRGB(60, 60, 60)
+    end)
+
+    table.insert(buttons, Button)
+end
+
+-- Create toggle buttons
+createToggleButton("Instant Reload", 50, "InstantReload")
+createToggleButton("Infinite Ammo", 100, "InfiniteAmmo")
+createToggleButton("No Recoil", 150, "NoRecoil")
+createToggleButton("No Spread", 200, "NoSpread")
+createToggleButton("Fast Shoot", 250, "FastShoot")
+
+-- Minimize Button Click
+MinimizeButton.MouseButton1Click:Connect(function()
+    contentVisible = not contentVisible
+    for _, btn in ipairs(buttons) do
+        btn.Visible = contentVisible
+    end
+end)
+
+-- Insert Key = Toggle Full GUI
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Insert then
+        guiVisible = not guiVisible
+        ScreenGui.Enabled = guiVisible
+    end
+end)
+
+-- Show loading for 2 seconds then reveal GUI
+task.delay(2, function()
+    LoadingFrame:Destroy()
+    Frame.Visible = true
+end)
+
+-- Main script logic
+RunService.RenderStepped:Connect(function()
+    if Settings.InstantReload and workspace:FindFirstChild(LocalPlayer.Name) then
+        local gun = workspace[LocalPlayer.Name]:FindFirstChild(LocalPlayer.Name .. "CustomGun")
+        if gun then
+            gun:SetAttribute("reloadTime", 0)
+        end
+    end
+
+    if Settings.InfiniteAmmo and workspace:FindFirstChild(LocalPlayer.Name) then
+        local gun = workspace[LocalPlayer.Name]:FindFirstChild(LocalPlayer.Name .. "CustomGun")
+        if gun then
+            gun:SetAttribute("magazineSize", math.huge)
+        end
+    end
+
+    if Settings.NoRecoil and workspace:FindFirstChild(LocalPlayer.Name) then
+        local gun = workspace[LocalPlayer.Name]:FindFirstChild(LocalPlayer.Name .. "CustomGun")
+        if gun then
+            gun:SetAttribute("recoilMin", Vector2.new(0, 0))
+            gun:SetAttribute("recoilMax", Vector2.new(0, 0))
+            gun:SetAttribute("recoilAimReduction", Vector2.new(0, 0))
+        end
+    end
+
+    if Settings.NoSpread and workspace:FindFirstChild(LocalPlayer.Name) then
+        local gun = workspace[LocalPlayer.Name]:FindFirstChild(LocalPlayer.Name .. "CustomGun")
+        if gun then
+            gun:SetAttribute("spread", 0)
+        end
+    end
+
+    if Settings.FastShoot and workspace:FindFirstChild(LocalPlayer.Name) then
+        local gun = workspace[LocalPlayer.Name]:FindFirstChild(LocalPlayer.Name .. "CustomGun")
+        if gun then
+            gun:SetAttribute("rateOfFire", math.huge)
+        end
+    end
+end)
