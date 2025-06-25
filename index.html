@@ -41,7 +41,7 @@
 
     .header {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr;
       align-items: center;
       padding: 15px;
       background: #0f071a;
@@ -73,12 +73,6 @@
       background-clip: text;
       color: transparent;
       text-transform: uppercase;
-    }
-
-    .header-percentage {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #ec4899;
     }
 
     .scroll-container {
@@ -296,9 +290,6 @@
       .header-title {
         font-size: 1.5rem;
       }
-      .header-percentage {
-        font-size: 1rem;
-      }
       .deck-title {
         font-size: 1rem;
       }
@@ -355,7 +346,7 @@
           "Has anti skid system (use the proper way for no crash) 🔴",
         ],
       },
-            {
+      {
         name: "SkidAPI Cloudy",
         progress: 93,
         note: "Unc",
@@ -411,15 +402,6 @@
         ],
       },
     ];
-
-    // Calculate average progress
-    const averageProgress = (
-      progressData.reduce((sum, item) => sum + item.progress, 0) /
-      progressData.length
-    ).toFixed(1);
-    document.getElementById(
-      "average-progress"
-    ).textContent = `Average : ${averageProgress}%`;
 
     // Generate bubble positions
     const bubblePositions = Array.from({ length: 10 }, () =>
